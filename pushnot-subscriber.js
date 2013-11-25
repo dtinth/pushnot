@@ -69,7 +69,7 @@ function notifyFrom(localLatest, serverLatest) {
       var api = zephyros.api().then()
       data.forEach(function(message) {
         var text
-        if (message.key < localLatest) return
+        if (message.key <= localLatest) return
         if (message.key > serverLatest) return
         try {
           var result = secure.decrypt(message.value)
