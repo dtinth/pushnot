@@ -1,40 +1,60 @@
 
-var config = require('./client-config')
+var config = require('./config')
 var secure = require('./secure')
+var api = require('./http-api')
 var log = console.log
-
 log = function() {}
 
 var when = require('when')
 var lift = require('when/node/function').lift
+
 var levelup = require('level')
 
 var zmq = require('zmq')
-var sub = zmq.socket('sub')
-
-var request = lift(require('request'))
+var sub
 
 var db = levelup(process.env.HOME + '/.pushnot.sub.db')
 var put = lift(db.put.bind(db))
 var get = lift(db.get.bind(db))
 
-sub.connect('tcp://' + config.server + ':' + config.zmq)
-sub.subscribe('latest')
-
-function api(path) {
-  return request('http://' + config.server + ':' + config.http + path,
-    { method: "POST", json: true })
-    .spread(function(res, body) { return body })
+// connect to zmq publisher, reconnecting every 30 seconds of inactivity
+function connect() {
+  var timeout = null
+  establishTimeout()
+  try {
+    if (sub) {
+      sub.close()
+    }
+    sub = zmq.socket('sub')
+    sub.connect('tcp://' + config.server + ':' + config.zmq)
+    sub.subscribe('latest')
+    sub.on('message', function(msg) {
+      clearTimeout(timeout)
+      establishTimeout()
+      when(msg)
+        .then(function(data) { return data.toString('utf-8').substr(7) })
+        .then(JSON.parse)
+        .then(gotLatest)
+      .otherwise(console.error)
+    })
+  } catch (e) {
+    console.error(e)
+  }
+  function establishTimeout() {
+    timeout = setTimeout(function() {
+      console.log(new Date(), 'connection lost to server')
+      connect()
+    }, 30000)
+  }
 }
 
+connect()
+
+// get the latest notification id
 function getLocalLatest() {
   return get('l-latest')
     .otherwise(function() {
       return api('/latest').then(function(result) { return result.latest })
-        .tap(function(id) { put('l-latest', id) })
-    })
-    .otherwise(function() {
-      return when('0')
         .tap(function(id) { put('l-latest', id) })
     })
 }
@@ -48,7 +68,7 @@ function gotLatest(info) {
   var serverLatest = info.latest
   getLocalLatest().then(function(localLatest) {
     console.log(localLatest, '-->', serverLatest)
-    if (serverLatest >= localLatest) {
+    if (serverLatest > localLatest) {
       log('new data')
       return notifyFrom(localLatest, serverLatest)
         .then(function() { return put('l-latest', serverLatest) })
@@ -70,18 +90,20 @@ function notifyFrom(localLatest, serverLatest) {
     .then(function(data) {
       var z = zephyros.api().then()
       data.forEach(function(message) {
-        var text, app = 'pushnot'
+        var text, app = 'unknown app', description = ''
         if (message.key < localLatest) return
         if (message.key > serverLatest) return
         if (message.key <= processLatest) return
         processLatest = message.key
         try {
           var result = secure.decrypt(message.value)
-          text = '[' + result.app + '] ' + result.text
+          description = result.text
+          app = result.app
+          text = '[' + app + '] ' + description
         } catch (e) {
-          text = 'Unable to decrypt message ' + message.key
+          description = text = 'Unable to decrypt message ' + message.key
         }
-        growl(text, { name: app })
+        growl(description, { name: 'pushnot', title: app })
         z = z.alert({ message: text, duration: 5 })
       })
     })
@@ -90,22 +112,5 @@ function notifyFrom(localLatest, serverLatest) {
 api('/latest')
   .then(gotLatest)
   .otherwise(console.error)
-
-sub.on('message', function(msg) {
-  when(msg)
-    .then(function(data) { return data.toString('utf-8').substr(7) })
-    .then(JSON.parse)
-    .then(gotLatest)
-  .otherwise(console.error)
-})
-
-
-
-
-
-
-
-
-
 
 

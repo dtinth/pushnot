@@ -24,13 +24,15 @@ exports.get = function(id) {
 }
 
 exports.after = function(id) {
+  var startKey = 'd-' + id
   return when.promise(function(resolve, reject) {
     var stream = db.createReadStream({
-      start:  'd-' + id,
+      start:  startKey,
       end:    'e'
     })
     var out = []
     stream.on('data', function(c) {
+      if (c.key <= startKey) return
       out.push({ key: c.key.substr(2), value: c.value })
     })
     stream.on('end', function() {
