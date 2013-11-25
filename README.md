@@ -1,7 +1,7 @@
 pushnot
 =======
 
-Thai's push notification server written in Node.js. A combination of:
+Thai's personal push notification server written in Node.js. A combination of:
 
 * [zephyros][] for alerts and [node-zephyros][] for a promise-based Node.js interface.
 * [express][] for building HTTP API.
@@ -9,9 +9,11 @@ Thai's push notification server written in Node.js. A combination of:
 * [zeromq][] and [zeromq.node][] for pubsub server.
 * [leveldb][] and [node-levelup][] for local database.
 * [growl][] and [node-growl][] for another notification system.
+* [hawk][] for HTTP authentication so that I don't have to roll my own.
 
-Components
-----------
+
+The Components
+--------------
 
 It consists of several components:
 
@@ -38,7 +40,13 @@ It consists of several components:
 ### The Subscriber
 
 * a zephyros script that subscribes to new notification messages
-  and display an alers.
+  and display an alert and send to growl.
+
+
+Getting Started
+---------------
+
+A detailed guide is coming soon, so stay tuned!
 
 
 [zephyros]: https://github.com/sdegutis/zephyros
@@ -51,4 +59,5 @@ It consists of several components:
 [levelup]: https://github.com/rvagg/node-levelup
 [growl]: http://growl.info/
 [node-growl]: https://github.com/visionmedia/node-growl
+[hawk]: https://github.com/hueniverse/hawk
 
