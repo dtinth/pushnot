@@ -1,0 +1,28 @@
+{
+  "name": "pushnot",
+  "version": "0.0.0",
+  "description": "My push notification server...",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dtinth/pushnot.git"
+  },
+  "author": "Thai Pangsakulyanont <org.yi.dttvb@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "request": "~2.27.0",
+    "express": "~3.4.4",
+    "ursa": "~0.8.0",
+    "zmq": "~2.5.1",
+    "level": "~0.18.0",
+    "when": "~2.6.0",
+    "node-zephyros": "~0.2.2"
+  },
+  "devDependencies": {
+    "mocha": "~1.14.0",
+    "chai": "~1.8.1"
+  }
+}
