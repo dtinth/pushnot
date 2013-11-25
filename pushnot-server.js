@@ -5,7 +5,7 @@ var storage = require('./storage')
 var zmq = require('zmq')
 var pub = zmq.socket('pub')
 
-pub.bindSync('tcp://127.0.0.1:60002')
+pub.bindSync('tcp://0.0.0.0:60002')
 app.use(express.urlencoded())
 
 function notifyAll() {
@@ -34,6 +34,7 @@ app.post('/notify', function(req, res, next) {
     console.log(id, req.param('data'))
     notifyAll()
     pub.send('latest ' + JSON.stringify({ latest: id }))
+    res.json('k')
   })
   .otherwise(console.error)
 })
