@@ -22,7 +22,8 @@
     "zmq": "~2.5.1",
     "level": "~0.18.0",
     "when": "~2.6.0",
-    "node-zephyros": "~0.2.2"
+    "node-zephyros": "~0.2.2",
+    "growl": "~1.7.0"
   },
   "devDependencies": {
     "mocha": "~1.14.0",

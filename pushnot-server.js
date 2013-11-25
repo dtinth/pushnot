@@ -40,5 +40,5 @@ app.post('/notify', function(req, res, next) {
 })
 
 app.listen(60001)
-setInterval(notifyAll, 15000)
+setInterval(notifyAll, 15001)
 

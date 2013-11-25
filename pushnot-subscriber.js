@@ -40,6 +40,7 @@ function getLocalLatest() {
 }
 
 var working = false
+var processLatest = '0'
 
 function gotLatest(info) {
   if (working) return
@@ -47,10 +48,10 @@ function gotLatest(info) {
   var serverLatest = info.latest
   getLocalLatest().then(function(localLatest) {
     console.log(localLatest, '-->', serverLatest)
-    if (serverLatest > localLatest) {
-      notifyFrom(localLatest, serverLatest)
-        .then(function() { return put('l-latest', serverLatest) })
+    if (serverLatest >= localLatest) {
       log('new data')
+      return notifyFrom(localLatest, serverLatest)
+        .then(function() { return put('l-latest', serverLatest) })
     } else {
       log('already up to date')
     }
@@ -62,22 +63,26 @@ function gotLatest(info) {
 }
 
 var zephyros = new (require('node-zephyros'))()
+var growl = require('growl')
 
 function notifyFrom(localLatest, serverLatest) {
   return api('/after/' + localLatest)
     .then(function(data) {
-      var api = zephyros.api().then()
+      var z = zephyros.api().then()
       data.forEach(function(message) {
-        var text
-        if (message.key <= localLatest) return
+        var text, app = 'pushnot'
+        if (message.key < localLatest) return
         if (message.key > serverLatest) return
+        if (message.key <= processLatest) return
+        processLatest = message.key
         try {
           var result = secure.decrypt(message.value)
           text = '[' + result.app + '] ' + result.text
         } catch (e) {
           text = 'Unable to decrypt message ' + message.key
         }
-        api = api.alert({ message: text, duration: 5 })
+        growl(text, { name: app })
+        z = z.alert({ message: text, duration: 5 })
       })
     })
 }
