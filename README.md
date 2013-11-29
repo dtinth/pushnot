@@ -1,6 +1,8 @@
 pushnot
 =======
 
+![Screenshot](http://me.dt.in.th/images/pushnot-Screenshot2.png)
+
 Thai's personal push notification server written in Node.js. A combination of:
 
 * [zephyros][] for alerts and [node-zephyros][] for a promise-based Node.js interface.
@@ -15,8 +17,9 @@ Thai's personal push notification server written in Node.js. A combination of:
 The Components
 --------------
 
-It consists of several components:
+![Overview](http://me.dt.in.th/images/pushnot.png)
 
+It consists of several components:
 
 ### The Server
 
@@ -46,7 +49,7 @@ It consists of several components:
 Getting Started
 ---------------
 
-A detailed guide is coming soon, so stay tuned!
+Read the [blog post](http://me.dt.in.th/page/pushnot/) for how to install.
 
 
 [zephyros]: https://github.com/sdegutis/zephyros
